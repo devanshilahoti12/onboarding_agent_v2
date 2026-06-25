@@ -9,3 +9,4 @@ class ScriptResponse(BaseModel):
     kb_identifier: str
     pages_indexed: int
     website_url: str
+    backend_url: str

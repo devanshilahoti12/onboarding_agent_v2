@@ -20,6 +20,38 @@ export default function DownloadPage() {
       .finally(() => setLoading(false))
   }, [customerId])
 
+  // Inject the live widget for in-platform preview — uses API key, not JWT,
+  // so it works regardless of login state
+  useEffect(() => {
+    if (!script) return
+
+    // Remove any previously injected widget instance
+    const existing = document.getElementById('igna-preview-script')
+    if (existing) existing.remove()
+    if ((window as any).IGNAChat) delete (window as any).IGNAChat
+
+    const s = document.createElement('script')
+    s.id = 'igna-preview-script'
+    s.src = `${script.backend_url}/widget/igna-chat-widget.js`
+    s.onload = () => {
+      if ((window as any).IGNAChat) {
+        (window as any).IGNAChat.init({
+          apiKey: script.api_key,
+          siteIdentifier: script.site_identifier,
+          kbIdentifier: script.kb_identifier,
+          pagesIndexed: script.pages_indexed,
+          backendUrl: script.backend_url,
+          theme: { primaryColor: '#1a1a2e', accentColor: '#4f46e5' },
+        })
+      }
+    }
+    document.body.appendChild(s)
+
+    return () => {
+      document.getElementById('igna-preview-script')?.remove()
+    }
+  }, [script])
+
   function downloadScript() {
     if (!script) return
     const blob = new Blob([script.script_content], { type: 'application/javascript' })

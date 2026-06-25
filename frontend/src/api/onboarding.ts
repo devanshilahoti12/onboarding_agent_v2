@@ -1,5 +1,5 @@
 import client from './client'
-import type { CrawlStatus, OnboardingResponse, ScriptData } from '../types'
+import type { CrawlStatus, OnboardingResponse, ScriptData, SiteSummary } from '../types'
 
 export async function submitOnboarding(
   full_name: string,
@@ -26,4 +26,9 @@ export async function getScript(customerId: number): Promise<ScriptData> {
 
 export function getDownloadUrl(customerId: number): string {
   return `/api/script/${customerId}/download`
+}
+
+export async function getMySites(): Promise<SiteSummary[]> {
+  const { data } = await client.get<SiteSummary[]>('/onboarding/sites')
+  return data
 }

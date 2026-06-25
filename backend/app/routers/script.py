@@ -56,6 +56,7 @@ def get_script(
         kb_identifier=site_config.kb_identifier,
         pages_indexed=site_config.pages_indexed,
         website_url=customer.website_url,
+        backend_url=site_config.backend_url,
     )
 
 

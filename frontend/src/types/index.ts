@@ -28,6 +28,15 @@ export interface CrawlStatus {
   completed_at: string | null
 }
 
+export interface SiteSummary {
+  customer_id: number
+  website_url: string
+  site_identifier: string
+  pages_indexed: number
+  crawl_status: 'queued' | 'running' | 'completed' | 'failed' | 'unknown'
+  created_at: string
+}
+
 export interface ScriptData {
   script_content: string
   filename: string
@@ -36,4 +45,5 @@ export interface ScriptData {
   kb_identifier: string
   pages_indexed: number
   website_url: string
+  backend_url: string
 }
