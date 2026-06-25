@@ -13,7 +13,7 @@ def get_model() -> SentenceTransformer:
     return _model
 
 
-def chunk_text(text: str, max_words: int = 500, overlap_words: int = 50) -> list[str]:
+def chunk_text(text: str, max_words: int = 200, overlap_words: int = 30) -> list[str]:
     words = text.split()
     if not words:
         return []

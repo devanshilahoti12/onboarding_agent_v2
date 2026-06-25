@@ -18,7 +18,7 @@ def get_chat_client() -> AzureOpenAI:
     return _chat_client
 
 
-def retrieve_context(kb_identifier: str, query: str, top_k: int = 5) -> list[dict]:
+def retrieve_context(kb_identifier: str, query: str, top_k: int = 10) -> list[dict]:
     """Embed query, search ChromaDB, return top-k chunks with metadata."""
     query_vector = embed_single(query)
     if not query_vector:
@@ -64,8 +64,7 @@ def answer(
 
     if not chunks:
         return (
-            "I don't have enough information in my knowledge base to answer that. "
-            "Please try asking something else about this website.",
+            "That question is outside my knowledge scope. I can only answer questions related to this website.",
             [],
         )
 
@@ -74,7 +73,7 @@ def answer(
     system_prompt = (
         f"You are a helpful AI assistant for the website {website_url}. "
         "Answer questions using ONLY the context provided below. "
-        "If the answer is not in the context, say you don't have that information — do not guess. "
+        "If the answer is not in the context, respond with: 'That question is outside my knowledge scope. I can only answer questions related to this website's content.' Do not guess or make up information. "
         "Be concise, friendly, and accurate."
         f"\n\nContext:\n{context}"
     )

@@ -53,8 +53,8 @@ export default function DashboardPage() {
               onAction={() => navigate('/onboarding')}
               actionLabel="Set Up New Site"
             />
-            <LockedCard title="IGNA Forms" description="AI-powered forms that adapt to your visitors." />
-            <LockedCard title="IGNA Insights" description="Analytics and insights from visitor conversations." />
+            <LockedCard title="IGNA Voice" description="AI-powered voice assistant for hands-free customer interactions." />
+            <LockedCard title="IGNA Sync" description="Sync your knowledge base across all your IGNA agents instantly." />
           </div>
         </div>
 
