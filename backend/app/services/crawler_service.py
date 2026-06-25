@@ -105,16 +105,16 @@ async def _crawl_site(start_url: str, db_job_id: str) -> tuple[list[dict], int]:
         if status != 200 or not html:
             return
         title, text = _extract_text(html, url)
+        # Always discover links so BFS can continue even if this page has little text
+        for link in _extract_links(html, url):
+            if link not in visited and _same_domain(start_url, link) and not _should_skip(link):
+                visited.add(link)
+                queue.append(link)
         if len(text) < 100:
             return
         pages.append({"url": url, "title": title, "text": text})
         # Update live counter in DB
         _update_job_counter(db_job_id, len(pages))
-        # Discover links
-        for link in _extract_links(html, url):
-            if link not in visited and _same_domain(start_url, link) and not _should_skip(link):
-                visited.add(link)
-                queue.append(link)
 
     async with httpx.AsyncClient(headers=headers) as client:
         start_norm = _normalize_url(start_url)
