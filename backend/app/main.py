@@ -29,7 +29,7 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
 
 from .database import Base, engine
 from .models import ApiKey, CrawlJob, Customer, DeploymentMeta, SiteConfig, User  # noqa: F401 — ensures tables are registered
-from .routers import agents, auth, chat, crawl, onboarding, script
+from .routers import agents, auth, chat, crawl, demo, onboarding, script
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -53,6 +53,7 @@ app.include_router(agents.router)
 app.include_router(crawl.router)
 app.include_router(script.router)
 app.include_router(chat.router)
+app.include_router(demo.router)
 
 # Serve the shared widget JS from /widget/
 _widget_dir = Path(__file__).parent / "static" / "widget"
