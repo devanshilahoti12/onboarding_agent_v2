@@ -28,8 +28,8 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
         return response
 
 from .database import Base, engine
-from .models import ApiKey, CrawlJob, Customer, SiteConfig, User  # noqa: F401 — ensures tables are registered
-from .routers import auth, chat, crawl, onboarding, script
+from .models import ApiKey, CrawlJob, Customer, DeploymentMeta, SiteConfig, User  # noqa: F401 — ensures tables are registered
+from .routers import agents, auth, chat, crawl, onboarding, script
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -49,6 +49,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(onboarding.router)
+app.include_router(agents.router)
 app.include_router(crawl.router)
 app.include_router(script.router)
 app.include_router(chat.router)
