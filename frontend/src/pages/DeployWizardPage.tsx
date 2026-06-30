@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Highlight, themes } from 'prism-react-renderer'
 import AppLayout from '../components/AppLayout'
 import { AGENTS, type Agent } from '../data/agents'
 import { submitDeployment, getScript } from '../api/onboarding'
-import { startDemo, getDemoStatus, stopDemo, type DemoStatus } from '../api/demo'
 import { useCrawlPoller } from '../hooks/useCrawlPoller'
 import type { ScriptData } from '../types/index'
 
@@ -445,15 +444,7 @@ function Step6({ data }: { data: FormData }) {
   const [scriptData, setScriptData] = useState<ScriptData | null>(null)
   const [scriptLoading, setScriptLoading] = useState(false)
   const [copied, setCopied]           = useState(false)
-
-  const [demoOpen, setDemoOpen]           = useState(false)
-  const [demoId, setDemoId]               = useState<string | null>(null)
-  const [demoQuestions, setDemoQuestions] = useState<string[]>([])
-  const [demoStatus, setDemoStatus]       = useState<DemoStatus>('starting')
-  const [demoLoading, setDemoLoading]     = useState(false)
-  const [demoError, setDemoError]         = useState('')
-  const [demoThreadError, setDemoThreadError] = useState('')
-  const demoIntervalRef                   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const navigate                          = useNavigate()
 
   const crawlStatus = useCrawlPoller(jobId)
   const dataRef     = useRef(data)
@@ -544,45 +535,6 @@ function Step6({ data }: { data: FormData }) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     })
-  }
-
-  /* ── Demo polling ── */
-  useEffect(() => {
-    if (!demoOpen || !demoId) return
-    if (demoStatus === 'done' || demoStatus === 'closed' || demoStatus === 'error') {
-      if (demoIntervalRef.current) { clearInterval(demoIntervalRef.current); demoIntervalRef.current = null }
-      return
-    }
-    demoIntervalRef.current = setInterval(() => {
-      getDemoStatus(demoId).then(res => {
-        setDemoStatus(res.status)
-        if (res.error) setDemoThreadError(res.error)
-      }).catch(() => {})
-    }, 2000)
-    return () => { if (demoIntervalRef.current) { clearInterval(demoIntervalRef.current); demoIntervalRef.current = null } }
-  }, [demoOpen, demoId, demoStatus])
-
-  function launchDemo() {
-    if (!customerId) return
-    setDemoOpen(true)
-    setDemoLoading(true)
-    setDemoError('')
-    setDemoStatus('starting')
-    setDemoQuestions([])
-    setDemoId(null)
-    startDemo(customerId)
-      .then(res => { setDemoId(res.demo_id); setDemoQuestions(res.questions) })
-      .catch(err => { setDemoError(err?.response?.data?.detail || 'Failed to start demo') })
-      .finally(() => setDemoLoading(false))
-  }
-
-  function handleStopDemo() {
-    if (demoId) stopDemo(demoId).catch(() => {})
-    if (demoIntervalRef.current) { clearInterval(demoIntervalRef.current); demoIntervalRef.current = null }
-    setDemoOpen(false)
-    setDemoId(null)
-    setDemoStatus('starting')
-    setDemoThreadError('')
   }
 
   /* ── Error ── */
@@ -708,7 +660,7 @@ function Step6({ data }: { data: FormData }) {
             </p>
           </div>
           <button
-            onClick={launchDemo}
+            onClick={() => customerId && navigate(`/demo/${customerId}`)}
             className="flex-shrink-0 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -795,81 +747,6 @@ function Step6({ data }: { data: FormData }) {
         </Link>
       </div>
 
-      {/* Demo modal */}
-      {demoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
-                </svg>
-                Live Demo
-              </h2>
-              <button onClick={handleStopDemo} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <div className="px-6 py-5 space-y-5">
-              {demoLoading ? (
-                <div className="flex flex-col items-center gap-3 py-6">
-                  <svg className="w-9 h-9 text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  <p className="text-sm text-slate-500 text-center">Generating questions from your knowledge base…</p>
-                </div>
-              ) : demoError ? (
-                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">{demoError}</div>
-              ) : (
-                <>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-700 mb-3">Questions being asked by the demo:</p>
-                    <ol className="space-y-2">
-                      {demoQuestions.map((q, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                          <span className="text-sm text-slate-700 pt-0.5">{q}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  <div className={`border rounded-xl px-4 py-3 ${demoStatus === 'error' ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
-                    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Status</p>
-                    <p className={`text-sm ${demoStatus === 'error' ? 'text-red-700' : 'text-slate-700'}`}>
-                      {demoStatus === 'starting' ? 'Initializing demo session…'
-                        : demoStatus === 'opening'  ? 'Opening browser and navigating to your website…'
-                        : demoStatus === 'running'  ? 'Demo in progress — Playwright is auto-typing questions into the chat…'
-                        : demoStatus === 'done'     ? 'All 3 questions answered! Click Stop Demo to close the browser.'
-                        : demoStatus === 'error'    ? (demoThreadError || 'An error occurred during the demo.')
-                        : 'Demo closed.'}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Modal footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={handleStopDemo}
-                disabled={demoLoading || (demoStatus !== 'done' && demoStatus !== 'error' && demoStatus !== 'closed')}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/>
-                </svg>
-                Stop Demo
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
