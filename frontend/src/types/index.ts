@@ -35,6 +35,8 @@ export interface SiteSummary {
   pages_indexed: number
   crawl_status: 'queued' | 'running' | 'completed' | 'failed' | 'unknown'
   created_at: string
+  municipality_name: string
+  entity_type: string
 }
 
 export interface ScriptData {

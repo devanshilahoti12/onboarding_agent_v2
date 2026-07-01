@@ -34,7 +34,7 @@ from .routers import agents, auth, chat, crawl, demo, onboarding, script
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="IGNA Onboarding Agent", version="1.0.0")
+app = FastAPI(title="NJ Civic AI Exchange", version="1.0.0")
 
 app.add_middleware(PrivateNetworkAccessMiddleware)
 

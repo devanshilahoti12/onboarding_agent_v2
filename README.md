@@ -1,4 +1,4 @@
-# IGNA Onboarding Agent
+# NJ Civic AI Exchange
 
 AI-powered embeddable chat widget platform. Crawls your website, builds a vector knowledge base, and generates a JavaScript snippet for your customers to drop into their site.
 

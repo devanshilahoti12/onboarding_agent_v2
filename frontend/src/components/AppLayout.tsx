@@ -71,10 +71,10 @@ function IcSupport() {
 const NAV_ITEMS = [
   { to: '/dashboard',   label: 'Dashboard',        icon: <IcDashboard />,  activePaths: undefined,   end: true  },
   { to: '/agents',      label: 'AI Agent Library',  icon: <IcAgents />,     activePaths: ['/agents'], end: false },
-  { to: '/dashboard',   label: 'My Requests',       icon: <IcRequests />,   activePaths: [],          end: false },
-  { to: '/onboarding',  label: 'Deployment Center', icon: <IcDeployment />, activePaths: ['/onboarding', '/download'], end: false },
-  { to: '/dashboard',   label: 'Connector Center',  icon: <IcConnector />,  activePaths: [],          end: false },
-  { to: '/dashboard',   label: 'Policy Library',    icon: <IcPolicy />,     activePaths: [],          end: false },
+  { to: '/my-requests', label: 'My Requests',        icon: <IcRequests />,   activePaths: ['/my-requests'], end: false },
+  { to: '/deployment-center', label: 'Deployment Center', icon: <IcDeployment />, activePaths: ['/deployment-center', '/onboarding', '/download', '/demo'], end: false },
+  { to: '/connector-center', label: 'Connector Center', icon: <IcConnector />, activePaths: ['/connector-center'], end: false },
+  { to: '/policy-library', label: 'Policy Library',  icon: <IcPolicy />,     activePaths: ['/policy-library'], end: false },
   { to: '#',            label: 'Support',           icon: <IcSupport />,    activePaths: [],          end: false },
 ]
 
@@ -111,7 +111,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </svg>
           </div>
           <div className="leading-tight">
-            <p className="text-white font-semibold text-[13.5px] leading-tight">IGNA Onboarding</p>
+            <p className="text-white font-semibold text-[13.5px] leading-tight">IGNA One</p>
             <p className="text-[10px] uppercase tracking-widest leading-tight" style={{ color: C.active }}>
               AI Platform
             </p>
