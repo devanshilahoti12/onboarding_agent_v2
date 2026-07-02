@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -30,6 +31,7 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
 from .database import Base, engine
 from .models import ApiKey, CrawlJob, Customer, DeploymentMeta, SiteConfig, User  # noqa: F401 — ensures tables are registered
 from .routers import agents, auth, chat, crawl, demo, onboarding, script
+from .services import demo_service
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -67,6 +69,11 @@ if _chatbot_widget.exists() and not _dest_widget.exists():
     _dest_widget.write_bytes(_chatbot_widget.read_bytes())
 
 app.mount("/widget", StaticFiles(directory=str(_widget_dir)), name="widget")
+
+
+@app.on_event("startup")
+async def on_startup():
+    demo_service.set_event_loop(asyncio.get_running_loop())
 
 
 @app.get("/health")
