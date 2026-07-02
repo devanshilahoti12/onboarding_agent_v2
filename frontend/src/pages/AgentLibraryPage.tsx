@@ -40,19 +40,32 @@ function AgentIcon({ type }: { type: Agent['icon'] }) {
 
 /* ── Agent card ─────────────────────────────────────────────────────── */
 function AgentCard({ agent }: { agent: Agent }) {
+  const isLive = agent.id === 'igna-chat'
+
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className={`relative bg-white border rounded-xl p-5 flex flex-col gap-3 shadow-sm transition-shadow ${isLive ? 'border-slate-200 hover:shadow-md' : 'border-slate-200 opacity-70'}`}>
+      {/* Coming Soon ribbon */}
+      {!isLive && (
+        <div className="absolute top-3.5 right-3.5 z-10">
+          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+            Coming Soon
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-sky-50 border border-sky-100 rounded-lg flex items-center justify-center flex-shrink-0 text-sky-500">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isLive ? 'bg-sky-50 border border-sky-100 text-sky-500' : 'bg-slate-100 border border-slate-200 text-slate-400'}`}>
           <AgentIcon type={agent.icon} />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-20">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-slate-900 text-[15px]">{agent.name}</span>
-            <span className="text-[11px] font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 whitespace-nowrap">
-              State Approved
-            </span>
+            {isLive && (
+              <span className="text-[11px] font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 whitespace-nowrap">
+                State Approved
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">{agent.category}</p>
         </div>
@@ -92,21 +105,34 @@ function AgentCard({ agent }: { agent: Agent }) {
 
       {/* Buttons */}
       <div className="flex gap-2 mt-1">
-        <Link
-          to={`/agents/${agent.id}`}
-          className="flex-1 text-center border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium py-2 rounded-lg transition-colors"
-        >
-          View Details
-        </Link>
-        <Link
-          to={`/agents/${agent.id}/deploy`}
-          className="flex-1 text-center bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
-        >
-          Request Deployment
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-          </svg>
-        </Link>
+        {isLive ? (
+          <>
+            <Link
+              to={`/agents/${agent.id}`}
+              className="flex-1 text-center border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium py-2 rounded-lg transition-colors"
+            >
+              View Details
+            </Link>
+            <Link
+              to={`/agents/${agent.id}/deploy`}
+              className="flex-1 text-center bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
+            >
+              Request Deployment
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+              </svg>
+            </Link>
+          </>
+        ) : (
+          <>
+            <button disabled className="flex-1 text-center border border-slate-200 text-slate-400 text-sm font-medium py-2 rounded-lg cursor-not-allowed">
+              View Details
+            </button>
+            <button disabled className="flex-1 text-center bg-slate-100 text-slate-400 text-sm font-semibold py-2 rounded-lg cursor-not-allowed">
+              Coming Soon
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
