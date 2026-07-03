@@ -448,6 +448,7 @@ function Step6({ data }: { data: FormData }) {
 
   const crawlStatus = useCrawlPoller(jobId)
   const dataRef     = useRef(data)
+  const submittedRef = useRef(false)
 
   function startSubmit() {
     setSubmitError('')
@@ -482,7 +483,11 @@ function Step6({ data }: { data: FormData }) {
   }
 
   /* Auto-submit on mount */
-  useEffect(() => { startSubmit() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (submittedRef.current) return
+    submittedRef.current = true
+    startSubmit()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* Fetch script once crawl finishes */
   useEffect(() => {
