@@ -12,6 +12,7 @@ import DeploymentCenterPage from './pages/DeploymentCenterPage'
 import ConnectorCenterPage from './pages/ConnectorCenterPage'
 import MyRequestsPage from './pages/MyRequestsPage'
 import PolicyLibraryPage from './pages/PolicyLibraryPage'
+import SupportPage from './pages/SupportPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAuth()
@@ -34,6 +35,7 @@ export default function App() {
       <Route path="/connector-center" element={<ProtectedRoute><ConnectorCenterPage /></ProtectedRoute>} />
       <Route path="/my-requests" element={<ProtectedRoute><MyRequestsPage /></ProtectedRoute>} />
       <Route path="/policy-library" element={<ProtectedRoute><PolicyLibraryPage /></ProtectedRoute>} />
+      <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to={token ? '/dashboard' : '/login'} replace />} />
     </Routes>
   )
