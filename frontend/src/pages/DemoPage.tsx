@@ -14,10 +14,13 @@ export default function DemoPage() {
   const [loading, setLoading]         = useState(true)
   const [startError, setStartError]   = useState('')
   const intervalRef                   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startedForRef                 = useRef<string | null>(null)
 
   /* Start demo on mount */
   useEffect(() => {
     if (!customerId) return
+    if (startedForRef.current === customerId) return
+    startedForRef.current = customerId
     startDemo(parseInt(customerId))
       .then(res => { setDemoId(res.demo_id); setQuestions(res.questions) })
       .catch(err => setStartError(err?.response?.data?.detail || 'Failed to start demo. Please try again.'))
