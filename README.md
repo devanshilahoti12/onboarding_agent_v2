@@ -1,4 +1,4 @@
-# NJ One Marketplace — IGNA AI Onboarding Platform
+# NJ Civic AI Exchange
 
 A full-stack web platform for onboarding New Jersey municipalities onto state-approved AI agents. Municipalities register their sites, trigger automated web crawls to build a RAG knowledge base, and receive an embeddable chatbot widget. Platform administrators can monitor deployments, manage data connectors, review governance policies, and submit support tickets — all from a unified dashboard.
 
