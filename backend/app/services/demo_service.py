@@ -106,7 +106,7 @@ def _run_demo(demo_id: str, website_url: str, script_data: dict, questions: list
         widget_content = _WIDGET_PATH.read_text(encoding="utf-8") if _WIDGET_PATH.exists() else ""
 
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True)
+            browser = pw.firefox.launch(headless=True)
             page = browser.new_page(viewport={"width": 1280, "height": 720})
 
             session["status"] = "opening"

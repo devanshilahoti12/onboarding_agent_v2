@@ -30,7 +30,7 @@ export default function DemoPage() {
   useEffect(() => {
     if (!demoId) return
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${proto}//${window.location.host}/api/demo/${demoId}/stream`)
+    const ws = new WebSocket(`${proto}//${window.location.hostname}:8000/api/demo/${demoId}/stream`)
     wsRef.current = ws
     ws.onmessage = (e) => setCurrentFrame(e.data)
     ws.onclose = () => {}
