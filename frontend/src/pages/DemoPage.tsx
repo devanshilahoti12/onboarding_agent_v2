@@ -7,6 +7,7 @@ export default function DemoPage() {
   const { customerId } = useParams<{ customerId: string }>()
   const navigate = useNavigate()
 
+
   const [questions, setQuestions]       = useState<string[]>([])
   const [demoId, setDemoId]             = useState<string | null>(null)
   const [status, setStatus]             = useState<DemoStatus>('starting')
@@ -16,10 +17,21 @@ export default function DemoPage() {
   const [currentFrame, setCurrentFrame] = useState<string | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const wsRef       = useRef<WebSocket | null>(null)
+  const [questions, setQuestions]     = useState<string[]>([])
+  const [demoId, setDemoId]           = useState<string | null>(null)
+  const [status, setStatus]           = useState<DemoStatus>('starting')
+  const [threadError, setThreadError] = useState('')
+  const [loading, setLoading]         = useState(true)
+  const [startError, setStartError]   = useState('')
+  const intervalRef                   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startedForRef                 = useRef<string | null>(null)
+
 
   /* Start demo on mount */
   useEffect(() => {
     if (!customerId) return
+    if (startedForRef.current === customerId) return
+    startedForRef.current = customerId
     startDemo(parseInt(customerId))
       .then(res => { setDemoId(res.demo_id); setQuestions(res.questions) })
       .catch(err => setStartError(err?.response?.data?.detail || 'Failed to start demo. Please try again.'))
