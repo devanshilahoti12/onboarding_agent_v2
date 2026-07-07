@@ -28,13 +28,13 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
         return response
 
 from .database import Base, engine
-from .models import ApiKey, CrawlJob, Customer, SiteConfig, User  # noqa: F401 — ensures tables are registered
-from .routers import auth, chat, crawl, onboarding, script
+from .models import ApiKey, CrawlJob, Customer, DeploymentMeta, SiteConfig, User  # noqa: F401 — ensures tables are registered
+from .routers import agents, auth, chat, crawl, demo, onboarding, script
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="IGNA Onboarding Agent", version="1.0.0")
+app = FastAPI(title="NJ Civic AI Exchange", version="1.0.0")
 
 app.add_middleware(PrivateNetworkAccessMiddleware)
 
@@ -49,9 +49,11 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(onboarding.router)
+app.include_router(agents.router)
 app.include_router(crawl.router)
 app.include_router(script.router)
 app.include_router(chat.router)
+app.include_router(demo.router)
 
 # Serve the shared widget JS from /widget/
 _widget_dir = Path(__file__).parent / "static" / "widget"
@@ -70,3 +72,8 @@ app.mount("/widget", StaticFiles(directory=str(_widget_dir)), name="widget")
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=False)

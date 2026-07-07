@@ -35,7 +35,7 @@ export default function LoginPage() {
               <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">IGNA Onboarding Agent</h1>
+          <h1 className="text-2xl font-bold text-gray-900">NJ Civic AI Exchange</h1>
           <p className="text-gray-500 mt-1 text-sm">Sign in to manage your AI chat widgets</p>
         </div>
 

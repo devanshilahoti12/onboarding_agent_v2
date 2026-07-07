@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..dependencies import get_current_user
-from ..models import ApiKey, CrawlJob, Customer, SiteConfig, User
+from ..models import ApiKey, CrawlJob, Customer, DeploymentMeta, SiteConfig, User
 from ..schemas.customer import OnboardingRequest, OnboardingResponse
 from ..services.crawler_service import run_crawl_pipeline
 
@@ -23,6 +23,8 @@ class SiteSummary(BaseModel):
     pages_indexed: int
     crawl_status: str
     created_at: datetime
+    municipality_name: str = ""
+    entity_type: str = ""
 
 router = APIRouter(prefix="/api/onboarding", tags=["onboarding"])
 
@@ -95,6 +97,7 @@ def get_my_sites(
 ):
     customers = (
         db.query(Customer)
+        .join(DeploymentMeta, DeploymentMeta.customer_id == Customer.id)
         .filter(Customer.user_id == current_user.id)
         .order_by(Customer.created_at.desc())
         .all()
@@ -102,7 +105,6 @@ def get_my_sites(
 
     results = []
     for c in customers:
-        # Latest crawl job for this customer
         latest_job = (
             db.query(CrawlJob)
             .filter(CrawlJob.customer_id == c.id)
@@ -110,6 +112,7 @@ def get_my_sites(
             .first()
         )
         site_config = db.query(SiteConfig).filter(SiteConfig.customer_id == c.id).first()
+        meta = db.query(DeploymentMeta).filter(DeploymentMeta.customer_id == c.id).first()
 
         results.append(SiteSummary(
             customer_id=c.id,
@@ -118,6 +121,8 @@ def get_my_sites(
             pages_indexed=site_config.pages_indexed if site_config else 0,
             crawl_status=latest_job.status if latest_job else "unknown",
             created_at=c.created_at,
+            municipality_name=meta.municipality_name if meta else "",
+            entity_type=meta.entity_type if meta else "",
         ))
 
     return results

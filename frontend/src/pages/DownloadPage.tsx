@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { Highlight, themes } from 'prism-react-renderer'
 import { getScript } from '../api/onboarding'
+import AppLayout from '../components/AppLayout'
 import type { ScriptData } from '../types'
 
 export default function DownloadPage() {
@@ -20,12 +21,8 @@ export default function DownloadPage() {
       .finally(() => setLoading(false))
   }, [customerId])
 
-  // Inject the live widget for in-platform preview — uses API key, not JWT,
-  // so it works regardless of login state
   useEffect(() => {
     if (!script) return
-
-    // Remove any previously injected widget instance
     const existing = document.getElementById('igna-preview-script')
     if (existing) existing.remove()
     if ((window as any).IGNAChat) delete (window as any).IGNAChat
@@ -41,15 +38,12 @@ export default function DownloadPage() {
           kbIdentifier: script.kb_identifier,
           pagesIndexed: script.pages_indexed,
           backendUrl: script.backend_url,
-          theme: { primaryColor: '#1a1a2e', accentColor: '#4f46e5' },
+          theme: { primaryColor: '#1a1a2e', accentColor: '#0ea5e9' },
         })
       }
     }
     document.body.appendChild(s)
-
-    return () => {
-      document.getElementById('igna-preview-script')?.remove()
-    }
+    return () => { document.getElementById('igna-preview-script')?.remove() }
   }, [script])
 
   function downloadScript() {
@@ -57,9 +51,7 @@ export default function DownloadPage() {
     const blob = new Blob([script.script_content], { type: 'application/javascript' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
-    a.download = script.filename
-    a.click()
+    a.href = url; a.download = script.filename; a.click()
     URL.revokeObjectURL(url)
   }
 
@@ -73,101 +65,126 @@ export default function DownloadPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <svg className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-3" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-          </svg>
-          <p className="text-gray-600 text-sm">Loading your script…</p>
+      <AppLayout>
+        <div className="flex items-center justify-center h-full min-h-96">
+          <div className="text-center">
+            <svg className="w-10 h-10 text-sky-500 animate-spin mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <p className="text-slate-500 text-sm">Loading your script…</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     )
   }
 
   if (error || !script) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'Something went wrong.'}</p>
-          <button onClick={() => navigate('/dashboard')} className="text-indigo-600 hover:underline text-sm">
-            Back to Dashboard
-          </button>
+      <AppLayout>
+        <div className="flex items-center justify-center h-full min-h-96">
+          <div className="text-center">
+            <p className="text-red-600 mb-4 text-sm">{error || 'Something went wrong.'}</p>
+            <button onClick={() => navigate('/dashboard')} className="text-sky-500 hover:underline text-sm font-medium">
+              Back to Dashboard
+            </button>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-3xl mx-auto">
-        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 mb-6 transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+    <AppLayout>
+      <div className="p-6 max-w-4xl mx-auto space-y-5">
+        {/* Breadcrumb */}
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
           Back to Dashboard
         </Link>
 
-        {/* Success Banner */}
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex items-center gap-4 mb-6">
-          <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
-            </svg>
-          </div>
-          <div>
-            <h2 className="font-semibold text-green-800 text-lg">Your knowledge base is ready!</h2>
-            <p className="text-green-700 text-sm mt-0.5">Your AI chat widget has been trained on your website.</p>
+        {/* ── Success banner ─────────────────────────────────────────── */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-green-50 border border-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[11px] font-semibold text-green-600 uppercase tracking-widest">DEPLOYMENT READY</p>
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Your knowledge base is ready!</h2>
+              <p className="text-slate-500 text-sm mt-1">IGNA Chat has been trained on your website content and is ready to deploy.</p>
+            </div>
+            <div className="flex-shrink-0 flex gap-2">
+              <button
+                onClick={copyToClipboard}
+                className="flex items-center gap-2 border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                {copied ? 'Copied!' : 'Copy Script'}
+              </button>
+              <button
+                onClick={downloadScript}
+                className="flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Download Script
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4">Crawl Summary</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-500 mb-1">Website Crawled</p>
-              <p className="text-sm font-medium text-gray-900 break-all">{script.website_url}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-500 mb-1">Pages Indexed</p>
-              <p className="text-2xl font-bold text-indigo-600">{script.pages_indexed}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-500 mb-1">Site Identifier</p>
-              <p className="text-sm font-mono text-gray-700">{script.site_identifier}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-500 mb-1">API Key</p>
-              <p className="text-sm font-mono text-gray-700 truncate">{script.api_key.slice(0, 20)}…</p>
-            </div>
+        {/* ── Crawl Summary + info cards ─────────────────────────────── */}
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h3 className="font-semibold text-slate-900">Crawl Summary</h3>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-slate-100">
+            <SummaryCell label="Website Crawled" value={script.website_url} mono={false} truncate />
+            <SummaryCell label="Pages Indexed" value={String(script.pages_indexed)} accent />
+            <SummaryCell label="Site Identifier" value={script.site_identifier} mono />
+            <SummaryCell label="API Key" value={script.api_key.slice(0, 18) + '…'} mono />
           </div>
         </div>
 
-        {/* Script Preview */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm mb-6 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        {/* ── Script preview ─────────────────────────────────────────── */}
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-400 rounded-full"/>
-              <div className="w-3 h-3 bg-yellow-400 rounded-full"/>
-              <div className="w-3 h-3 bg-green-400 rounded-full"/>
-              <span className="ml-2 text-sm text-gray-500 font-mono">{script.filename}</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 bg-red-400 rounded-full"/>
+                <div className="w-3 h-3 bg-yellow-400 rounded-full"/>
+                <div className="w-3 h-3 bg-green-400 rounded-full"/>
+              </div>
+              <span className="text-sm text-slate-500 font-mono ml-2">{script.filename}</span>
             </div>
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-sky-600 transition-colors font-medium"
             >
               {copied ? (
                 <>
-                  <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
+                  <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
                   </svg>
                   Copied!
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                   </svg>
                   Copy code
                 </>
@@ -180,7 +197,7 @@ export default function DownloadPage() {
                 <pre className={`${className} p-5 m-0 min-w-max`} style={style}>
                   {tokens.map((line, i) => (
                     <div key={i} {...getLineProps({ line })}>
-                      <span className="select-none text-gray-500 mr-4 text-xs" style={{ userSelect: 'none' }}>
+                      <span className="select-none text-slate-600 mr-4 text-xs" style={{ userSelect: 'none' }}>
                         {String(i + 1).padStart(2, ' ')}
                       </span>
                       {line.map((token, key) => (
@@ -194,37 +211,18 @@ export default function DownloadPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={copyToClipboard}
-            className="flex-1 flex items-center justify-center gap-2 border border-indigo-300 text-indigo-700 hover:bg-indigo-50 font-medium py-3 rounded-xl transition-colors text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-            {copied ? 'Copied!' : 'Copy to Clipboard'}
-          </button>
-          <button
-            onClick={downloadScript}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-colors text-sm"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-            </svg>
-            Download igna-chat.js
-          </button>
-        </div>
-
-        {/* Integration Instructions */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-          <h3 className="font-semibold text-gray-900 mb-5">How to integrate</h3>
-          <div className="space-y-4">
+        {/* ── How to integrate ───────────────────────────────────────── */}
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h3 className="font-semibold text-slate-900">How to Integrate</h3>
+            <p className="text-slate-500 text-sm mt-0.5">Follow these steps to add IGNA Chat to your website.</p>
+          </div>
+          <div className="p-6 space-y-5">
             {[
               {
                 step: 1,
                 title: 'Download the script',
-                desc: 'Click "Download igna-chat.js" above to save the file to your computer.',
+                desc: 'Click "Download Script" above to save the file to your computer.',
               },
               {
                 step: 2,
@@ -234,19 +232,19 @@ export default function DownloadPage() {
               {
                 step: 3,
                 title: 'Add to your HTML',
-                desc: 'Paste the following line into your website\'s HTML just before the </body> closing tag on every page.',
+                desc: "Paste the following line into your website's HTML just before the </body> closing tag on every page.",
                 code: `<script src="/igna-chat.js"></script>`,
               },
             ].map(({ step, title, desc, code }) => (
               <div key={step} className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="flex-shrink-0 w-8 h-8 bg-sky-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                   {step}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">{title}</p>
-                  <p className="text-gray-500 text-sm mt-0.5">{desc}</p>
+                <div className="pt-0.5">
+                  <p className="font-medium text-slate-900 text-sm">{title}</p>
+                  <p className="text-slate-500 text-sm mt-1">{desc}</p>
                   {code && (
-                    <code className="mt-2 block bg-gray-900 text-green-400 text-xs rounded-lg px-4 py-2 font-mono">
+                    <code className="mt-2.5 block bg-slate-900 text-green-400 text-xs rounded-lg px-4 py-2.5 font-mono">
                       {code}
                     </code>
                   )}
@@ -255,13 +253,37 @@ export default function DownloadPage() {
             ))}
           </div>
 
-          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <div className="mx-6 mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <p className="text-xs text-amber-800">
-              <strong>Note:</strong> Once the script loads, a chat button will appear in the bottom-right corner of your website, ready to answer visitor questions using your indexed content.
+              <strong>Note:</strong> Once the script loads, a chat button will appear in the bottom-right corner of your website,
+              ready to answer visitor questions using your indexed content.
             </p>
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="pb-2 text-center">
+          <p className="text-xs text-slate-400">© 2026 Ignatiuz. All rights reserved.</p>
+        </div>
       </div>
+    </AppLayout>
+  )
+}
+
+/* ── Sub-components ──────────────────────────────────────────────────── */
+
+function SummaryCell({ label, value, mono = false, accent = false, truncate = false }: {
+  label: string; value: string; mono?: boolean; accent?: boolean; truncate?: boolean
+}) {
+  return (
+    <div className="px-5 py-4">
+      <p className="text-[11px] text-slate-400 mb-1 uppercase tracking-wider font-medium">{label}</p>
+      <p className={`text-sm font-medium break-all ${
+        accent ? 'text-2xl font-bold text-sky-500' :
+        mono ? 'font-mono text-slate-700' : 'text-slate-900'
+      } ${truncate ? 'truncate' : ''}`}>
+        {value}
+      </p>
     </div>
   )
 }

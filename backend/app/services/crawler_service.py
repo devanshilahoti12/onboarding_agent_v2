@@ -143,7 +143,7 @@ def _chunk_id(url: str, chunk_index: int) -> str:
     return f"{url_hash}__chunk_{chunk_index}"
 
 
-async def run_crawl_pipeline(job_id: str, website_url: str, site_identifier: str, customer_id: int):
+async def run_crawl_pipeline(job_id: str, website_url: str, site_identifier: str, customer_id: int, additional_urls: list[str] | None = None):
     db = SessionLocal()
     try:
         job = db.query(CrawlJob).filter(CrawlJob.job_id == job_id).first()
@@ -159,8 +159,25 @@ async def run_crawl_pipeline(job_id: str, website_url: str, site_identifier: str
         # Clear any prior collection for this site
         delete_collection(kb_identifier)
 
-        # Crawl
+        # Crawl main site (BFS)
         pages, total_crawled = await _crawl_site(website_url, job_id)
+
+        # Fetch each additional data-source URL (single page, no BFS)
+        if additional_urls:
+            async with httpx.AsyncClient(headers={
+                "User-Agent": "IGNAChatBot/1.0 (site indexing for AI chat; contact: support@igna.ai)",
+                "Accept": "text/html,application/xhtml+xml",
+            }) as client:
+                for extra_url in additional_urls:
+                    try:
+                        html, status = await _fetch_page(client, extra_url)
+                        if status == 200 and html:
+                            title, text = _extract_text(html, extra_url)
+                            if len(text) >= 100:
+                                pages.append({"url": extra_url, "title": title, "text": text})
+                                total_crawled += 1
+                    except Exception:
+                        pass
 
         if not pages:
             job.status = "failed"
