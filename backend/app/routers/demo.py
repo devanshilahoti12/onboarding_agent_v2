@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+import asyncio
+
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -75,3 +77,21 @@ def stop_demo(
 ):
     demo_service.stop_session(demo_id)
     return {"ok": True}
+
+
+@router.websocket("/{demo_id}/stream")
+async def demo_stream(demo_id: str, websocket: WebSocket):
+    await websocket.accept()
+    q = demo_service._frame_queues.get(demo_id)
+    if q is None:
+        await websocket.close(code=1008)
+        return
+    try:
+        while True:
+            frame = await asyncio.wait_for(q.get(), timeout=60.0)
+            if frame is None:  # sentinel — demo ended
+                await websocket.close()
+                break
+            await websocket.send_text(frame)
+    except (WebSocketDisconnect, asyncio.TimeoutError):
+        pass

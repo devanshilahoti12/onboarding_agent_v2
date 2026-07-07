@@ -75,7 +75,7 @@ const NAV_ITEMS = [
   { to: '/deployment-center', label: 'Deployment Center', icon: <IcDeployment />, activePaths: ['/deployment-center', '/onboarding', '/download', '/demo'], end: false },
   { to: '/connector-center', label: 'Connector Center', icon: <IcConnector />, activePaths: ['/connector-center'], end: false },
   { to: '/policy-library', label: 'Policy Library',  icon: <IcPolicy />,     activePaths: ['/policy-library'], end: false },
-  { to: '#',            label: 'Support',           icon: <IcSupport />,    activePaths: [],          end: false },
+  { to: '/support',      label: 'Support',           icon: <IcSupport />,    activePaths: ['/support'], end: false },
 ]
 
 export default function AppLayout({ children }: { children: ReactNode }) {
